@@ -6,8 +6,10 @@ import TableOfContents from './components/TableOfContents';
 import ReadContent from './components/ReadContent';
 import Controller from './components/Controller';
 import CreateContent from './components/CreateContent';
+import UpdateContent from './components/UpdateContent';
 
 class App extends Component {
+
   constructor(props) {
     super(props);
     this.max_content_id = 3;
@@ -41,39 +43,64 @@ class App extends Component {
       ]
     };
   }
-  render() {
-    let _title, _desc, _article;
+
+  getContent() {
+    let _title, _desc;
     if (this.state.mode === 'welcome') {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.description;
-      _article = <ReadContent title={_title} description={_desc} />;
+      return <ReadContent title={_title} description={_desc} />;
     } else if (this.state.mode === 'read') {
-      this.state.contents.some((content) => {
-        if (content.id === this.state.selected_content_id) {
-          _title = content.title;
-          _desc = content.description;
-          return true;
-        }
-        return false;
-      });
-      _article = <ReadContent title={_title} description={_desc} />;
+      let content = this.getReadContent();
+      return <ReadContent title={content.title} description={content.desc} />;
     } else if (this.state.mode === 'create') {
-      _article = <CreateContent onSubmit={(title, description) => {
-        // this.state.contents.push({
-        //   id: ++this.max_content_id,
-        //   title,
-        //   description
-        // });
-        // this.setState({ contents: this.state.contents });
+      return <CreateContent onSubmit={(title, description) => {
         this.setState({
           contents: this.state.contents.concat({
             id: ++this.max_content_id,
             title,
             description
-          })
+          }),
+          mode: 'read',
+          selected_content_id: this.max_content_id
         });
       }} />;
+    } else if (this.state.mode === 'update') {
+      return <UpdateContent
+        content={this.getReadContent()}
+        onSubmit={(_content) => {
+          console.log(_content);
+          this.setState({
+            contents: Array.from(this.state.contents).map((content) => {
+              if (_content.id === content.id) content = _content;
+              return content;
+            }),
+            mode: 'read',
+            selected_content_id: _content.id
+          });
+        }}
+      />;
+    } else if (this.state.mode === 'delete') {
+      // 여기서 mode를 다시 수정할 경우 에러가 발생한다.
+      // 따로 함수로 만들거나 render 안에서 해결해야 한다.
     }
+  }
+
+  getReadContent() {
+    let _content = {};
+    this.state.contents.some((content) => {
+      if (content.id === this.state.selected_content_id) {
+        _content.id = content.id;
+        _content.title = content.title;
+        _content.desc = content.description;
+        return true;
+      }
+      return false;
+    });
+    return _content;
+  }
+
+  render() {
     return (
       <div className="App">
         <header className="App-header">
@@ -107,13 +134,22 @@ class App extends Component {
             onChangePage={(id) => this.setState({ mode: 'read', selected_content_id: id })}
           />
           <Controller
-            onChangeMode={(mode) => this.setState({ mode })}
+            onChangeMode={(mode) => {
+              if (mode === 'delete') {
+                if (window.confirm('정말로 삭제하시겠습니까?')) {
+                  const contents = Array.from(this.state.contents)
+                    .filter((content) => content.id !== this.state.selected_content_id);
+                  this.setState({ contents, mode: 'welcome' });
+                }
+              } else this.setState({ mode })
+            }}
           />
-          {_article}
+          {this.getContent()}
         </header>
       </div>
     );
   }
+
 }
 
 export default App;

@@ -24,7 +24,10 @@ class Controller extends Component {
           <input
             type="button"
             value="Delete"
-            onClick={() => {}}
+            onClick={(e) => {
+              e.preventDefault();
+              this.props.onChangeMode('delete');
+            }}
           />
         </li>
       </ul>
