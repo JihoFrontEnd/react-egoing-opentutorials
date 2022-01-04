@@ -74,7 +74,15 @@ class App extends Component {
             subTitle={this.state.subject.subTitle}
           /> */}
           <header>
-            <a href="/" onClick={(e) => e.preventDefault() /* 페이지 전환 막기 */}>
+            {/* <a href="/" onClick={function (e) {
+              e.preventDefault(); // 페이지 이동 막음
+              // this.state.mode = 'welcome'; // 직접 state 값을 mutate 할 수 없다.
+              this.setState({ mode: 'welcome' }); // state 변경 시
+            }.bind(this)}> */}
+            <a href="/" onClick={(e) => {
+              e.preventDefault();
+              this.setState({ mode: 'welcome' });
+            }}>
               <h1>{this.state.subject.title}</h1>
             </a>
             <p>{this.state.subject.subTitle}</p>
