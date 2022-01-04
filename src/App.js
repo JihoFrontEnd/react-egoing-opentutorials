@@ -3,13 +3,17 @@ import './App.css';
 import { Component } from 'react';
 import Subject from './components/Subject';
 import TableOfContents from './components/TableOfContents';
-import Content from './components/Content';
+import ReadContent from './components/ReadContent';
+import Controller from './components/Controller';
+import CreateContent from './components/CreateContent';
 
 class App extends Component {
   constructor(props) {
     super(props);
+    this.max_content_id = 3;
     this.state = {
       mode: 'welcome',
+      selected_content_id: 1,
       welcome: {
         title: 'Welcome',
         description: 'Hello React!'
@@ -38,13 +42,37 @@ class App extends Component {
     };
   }
   render() {
-    let _title, _desc;
+    let _title, _desc, _article;
     if (this.state.mode === 'welcome') {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.description;
-    } else {
-      _title = this.state.contents[0].title;
-      _desc = this.state.contents[0].description;
+      _article = <ReadContent title={_title} description={_desc} />;
+    } else if (this.state.mode === 'read') {
+      this.state.contents.some((content) => {
+        if (content.id === this.state.selected_content_id) {
+          _title = content.title;
+          _desc = content.description;
+          return true;
+        }
+        return false;
+      });
+      _article = <ReadContent title={_title} description={_desc} />;
+    } else if (this.state.mode === 'create') {
+      _article = <CreateContent onSubmit={(title, description) => {
+        // this.state.contents.push({
+        //   id: ++this.max_content_id,
+        //   title,
+        //   description
+        // });
+        // this.setState({ contents: this.state.contents });
+        this.setState({
+          contents: this.state.contents.concat({
+            id: ++this.max_content_id,
+            title,
+            description
+          })
+        });
+      }} />;
     }
     return (
       <div className="App">
@@ -69,26 +97,19 @@ class App extends Component {
           >
             React Lecture (egoing)
           </a>
-          {/* <Subject
+          <Subject
             title={this.state.subject.title}
             subTitle={this.state.subject.subTitle}
-          /> */}
-          <header>
-            {/* <a href="/" onClick={function (e) {
-              e.preventDefault(); // 페이지 이동 막음
-              // this.state.mode = 'welcome'; // 직접 state 값을 mutate 할 수 없다.
-              this.setState({ mode: 'welcome' }); // state 변경 시
-            }.bind(this)}> */}
-            <a href="/" onClick={(e) => {
-              e.preventDefault();
-              this.setState({ mode: 'welcome' });
-            }}>
-              <h1>{this.state.subject.title}</h1>
-            </a>
-            <p>{this.state.subject.subTitle}</p>
-          </header>
-          <TableOfContents data={this.state.contents} />
-          <Content title={_title} description={_desc} />
+            onChangePage={() => this.setState({ mode: 'welcome' })}
+          />
+          <TableOfContents
+            data={this.state.contents}
+            onChangePage={(id) => this.setState({ mode: 'read', selected_content_id: id })}
+          />
+          <Controller
+            onChangeMode={(mode) => this.setState({ mode })}
+          />
+          {_article}
         </header>
       </div>
     );

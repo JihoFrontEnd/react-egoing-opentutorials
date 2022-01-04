@@ -1,6 +1,9 @@
 import { Component } from "react";
 
 class TableOfContents extends Component {
+  shouldComponentUpdate(newProps, _newState) {
+    return newProps.data === this.props.data ? false : true;
+  }
   render() {
     return (
       <nav>
@@ -10,7 +13,11 @@ class TableOfContents extends Component {
               <li key={item.id}>
                 <a
                   className="App-link"
-                  href={"content/" + item.id}
+                  href={"/content/" + item.id}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    this.props.onChangePage(item.id);
+                  }}
                 >
                   {item.title}
                 </a>
